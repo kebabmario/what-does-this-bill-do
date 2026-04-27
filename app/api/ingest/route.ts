@@ -10,10 +10,16 @@ function toDateOrNull(v?: string | null) {
 export async function POST(req: NextRequest) {
   try {
     const authHeader = req.headers.get("authorization");
-    const expected = `Bearer ${process.env.INGEST_SECRET}`;
-    if (!process.env.INGEST_SECRET || authHeader !== expected) {
+    const isBearerOk =
+      !!process.env.INGEST_SECRET &&
+      authHeader === `Bearer ${process.env.INGEST_SECRET}`;
+
+    const isVercelCron = req.headers.get("x-vercel-cron") === "1";
+
+    if (!isBearerOk && !isVercelCron) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    
 
     const key = process.env.PROVIDER_API_KEY;
     if (!key) {
