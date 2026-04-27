@@ -3,8 +3,19 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
+type BillListItem = {
+  id: string;
+  externalId: string;
+  title: string;
+  status: string;
+  jurisdiction: string;
+  introducedAt: Date | null;
+  lastActionAt: Date | null;
+  sourceUrl: string | null;
+};
+
 export default async function BillsPage() {
-  const bills = await prisma.bill.findMany({
+  const bills: BillListItem[] = await prisma.bill.findMany({
     orderBy: { lastActionAt: "desc" },
     select: {
       id: true,
@@ -26,7 +37,7 @@ export default async function BillsPage() {
       </p>
 
       <div className="space-y-4">
-        {bills.map((bill) => (
+        {bills.map((bill: BillListItem) => (
           <Link
             key={bill.id}
             href={`/bills/${bill.id}`}
