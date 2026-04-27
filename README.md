@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# What does this bill do?
+
+Tracks U.S. bills in plain language. The app ingests data from Congress.gov, stores it with Prisma + PostgreSQL, and provides a clean UI to browse bills, statuses, dates, and sources.
+
+## Tech Stack
+
+- Next.js (App Router) + TypeScript
+- Prisma ORM
+- PostgreSQL (Supabase)
+- Vercel (deployment + cron)
+
+## Features
+
+- Bills list page (`/bills`)
+- Bill detail page (`/bills/[id]`)
+- REST API (`/api/bills`, `/api/bills/[id]`)
+- Ingestion endpoint (`/api/ingest`) with secret auth
+- Scheduled ingestion support via Vercel Cron
+
+## Environment Variables
+
+Create a `.env` file in the project root:
+
+```env
+DATABASE_URL="your_pooled_postgres_url"
+DIRECT_URL="your_direct_postgres_url"
+INGEST_SECRET="your_secret"
+PROVIDER_API_KEY="your_congress_gov_api_key"
+```
 
 ## Getting Started
 
-First, run the development server:
+Install dependencies:
+
+```bash
+npm install
+```
+
+Generate Prisma client:
+
+```bash
+npx prisma generate
+```
+
+Run migrations:
+
+```bash
+npx prisma migrate dev
+```
+
+(Optional) Seed local sample data:
+
+```bash
+npm run seed
+```
+
+Start dev server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Ingest Data Manually
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+curl -X POST http://localhost:3000/api/ingest -H "Authorization: Bearer YOUR_INGEST_SECRET"
+```
 
-## Learn More
+## Deploy (Vercel)
 
-To learn more about Next.js, take a look at the following resources:
+1. Push repo to GitHub
+2. Import project in Vercel
+3. Add env vars in Vercel project settings
+4. (Optional) Add `vercel.json` cron config:
+   ```json
+   {
+     "crons": [{ "path": "/api/ingest", "schedule": "0 9 * * *" }]
+   }
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT

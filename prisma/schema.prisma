@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Bill {
+  id             String            @id @default(cuid())
+  externalId     String            @unique
+  jurisdiction   String
+  title          String
+  summary        String?
+  status         String
+  introducedAt   DateTime?
+  lastActionAt   DateTime?
+  sourceUrl      String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  versions       BillVersion[]
+  statusEvents   BillStatusEvent[]
+
+  @@index([jurisdiction, status])
+  @@index([lastActionAt])
+}
+
+model BillVersion {
+  id             String      @id @default(cuid())
+  billId         String
+  versionLabel   String
+  textContent    String
+  sourceUrl      String?
+  publishedAt    DateTime?
+  createdAt      DateTime    @default(now())
+
+  bill Bill @relation(fields: [billId], references: [id], onDelete: Cascade)
+
+  @@unique([billId, versionLabel])
+  @@index([billId, publishedAt])
+}
+
+model BillStatusEvent {
+  id           String    @id @default(cuid())
+  billId       String
+  status       String
+  eventDate    DateTime?
+  description  String?
+  sourceUrl    String?
+  createdAt    DateTime  @default(now())
+
+  bill Bill @relation(fields: [billId], references: [id], onDelete: Cascade)
+
+  @@index([billId, eventDate])
+}
